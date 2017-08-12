@@ -1,2 +1,2 @@
-# bit-ints-array-of-bools
+# big-ints-array-of-bools
 Why?
