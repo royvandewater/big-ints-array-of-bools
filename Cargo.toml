@@ -1,0 +1,6 @@
+[package]
+name = "big-ints-array-of-bools"
+version = "0.1.0"
+authors = ["Roy van de Water <roy.v.water@gmail.com>"]
+
+[dependencies]
