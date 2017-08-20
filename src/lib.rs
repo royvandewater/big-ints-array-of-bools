@@ -1,4 +1,5 @@
 use std::clone::Clone;
+use std::fmt;
 use std::ops::Add;
 use std::ops::Mul;
 
@@ -16,19 +17,46 @@ impl BigInt {
         }
 
         let mut big_int = BigInt { value: vec![] };
-        let mut count = 0;
+        let mut count = BigInt { value: vec![] };
+        let one = BigInt { value: vec![true] };
 
         for val in value_str.chars().rev() {
             let mut sub_value = BigInt::char_to_big_int(val);
             let ten = BigInt { value: vec![true, false, true, false] };
-            if count > 0 {
-                sub_value = sub_value * ten
-            }
+
+            sub_value = sub_value * ten.pow(count.clone());
             big_int = big_int + sub_value;
-            count += 1;
+            count = count.clone() + one.clone();
         }
 
         Ok(big_int)
+    }
+
+    pub fn pow(self, other: BigInt) -> BigInt {
+        let mut counter = BigInt::zero();
+        let mut product = BigInt::one();
+
+        loop {
+            if counter == other {
+                return product;
+            }
+            counter = counter + BigInt::one();
+            product = self.clone() * product
+        }
+    }
+
+    pub fn str<'a>(&self) -> String {
+        let mut value = String::from("");
+
+        for val in self.value.iter().rev() {
+            if *val {
+                value = value + "1"
+            } else {
+                value = value + "0"
+            }
+        }
+
+        value
     }
 
     pub fn to_string(&self) -> String {
@@ -48,6 +76,14 @@ impl BigInt {
     // static
     fn char_to_big_int(character: char) -> BigInt {
         BigInt { value: helpers::char_to_bool_vector(character) }
+    }
+
+    fn zero() -> BigInt {
+        BigInt { value: vec![] }
+    }
+
+    fn one() -> BigInt {
+        BigInt { value: vec![true] }
     }
 }
 
@@ -89,6 +125,12 @@ impl Clone for BigInt {
     }
 }
 
+impl fmt::Display for BigInt {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(formatter, "{}", self.str())
+    }
+}
+
 impl Mul for BigInt {
     type Output = BigInt;
 
@@ -97,7 +139,6 @@ impl Mul for BigInt {
         let mut product = BigInt { value: vec![] };
 
         for val in self.value.iter().rev() {
-            println!("product: {:?}, val: {:?}, rhs: {:?}", product, val, rhs);
             if *val {
                 product = product + rhs.clone()
             }
@@ -174,6 +215,41 @@ mod tests {
     }
 
     #[test]
+    fn it_stores_its_value_as_bool_vec_with_64() {
+        let ten = BigInt::new("64").unwrap();
+
+        assert_eq!(
+            vec![true, false, false, false, false, false, false],
+            ten.value
+        );
+    }
+
+    #[test]
+    fn it_stores_its_value_as_bool_vec_with_128() {
+        let ten = BigInt::new("128").unwrap();
+
+        assert_eq!(
+            vec![true, false, false, false, false, false, false, false],
+            ten.value
+        );
+    }
+
+    #[test]
+    fn it_stores_a_big_value() {
+        // (2^64) + 1
+        let big = BigInt::new("9223372036854775808");
+        assert!(big.is_ok());
+    }
+
+    #[test]
+    fn it_stores_a_bigger_value() {
+        // (2^64) + 1
+        let big = BigInt::new("9223372036854775808").unwrap();
+        let small = BigInt::new("100").unwrap();
+        let bigger = big.pow(small);
+    }
+
+    #[test]
     fn it_is_not_the_same_as_another() {
         let zero = BigInt::new("0").unwrap();
         let one = BigInt::new("1").unwrap();
@@ -196,10 +272,32 @@ mod tests {
         assert_ne!(zero, two);
     }
 
+    // str()
+    #[test]
+    fn test_str_0() {
+        let zero = BigInt::new("0").unwrap();
+
+        assert_eq!("0", zero.str())
+    }
+
+    #[test]
+    fn test_str_1() {
+        let one = BigInt::new("1").unwrap();
+
+        assert_eq!("1", one.str())
+    }
+
+    #[test]
+    fn test_str_2() {
+        let two = BigInt::new("2").unwrap();
+
+        assert_eq!("2", two.str())
+    }
+
     // Add
 
     #[test]
-    fn zero_plus_zero_is_zero() {
+    fn test_zero_plus_zero_is_zero() {
         let zero1 = BigInt::new("0").unwrap();
         let zero2 = BigInt::new("0").unwrap();
         let zero3 = BigInt::new("0").unwrap();
@@ -208,7 +306,7 @@ mod tests {
     }
 
     #[test]
-    fn zero_plus_one_is_one() {
+    fn test_zero_plus_one_is_one() {
         let zero = BigInt::new("0").unwrap();
         let one1 = BigInt::new("1").unwrap();
         let one2 = BigInt::new("1").unwrap();
@@ -217,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    fn one_plus_zero_is_one() {
+    fn test_one_plus_zero_is_one() {
         let zero = BigInt::new("0").unwrap();
         let one1 = BigInt::new("1").unwrap();
         let one2 = BigInt::new("1").unwrap();
@@ -226,7 +324,7 @@ mod tests {
     }
 
     #[test]
-    fn one_plus_one_is_two() {
+    fn test_one_plus_one_is_two() {
         let one1 = BigInt::new("1").unwrap();
         let one2 = BigInt::new("1").unwrap();
         let two = BigInt::new("2").unwrap();
@@ -276,5 +374,32 @@ mod tests {
         let two = BigInt::new("2").unwrap();
         let four = BigInt::new("4").unwrap();
         assert_eq!(four, two.clone() * two.clone())
+    }
+
+    // Pow
+    #[test]
+    fn test_pow_0_pow_0_is_1() {
+        let zero1 = BigInt::new("0").unwrap();
+        let zero2 = BigInt::new("0").unwrap();
+        let one = BigInt::new("1").unwrap();
+        assert_eq!(one, zero1.pow(zero2))
+    }
+
+    // Pow
+    #[test]
+    fn test_pow_2_pow_1_is_2() {
+        let one = BigInt::new("1").unwrap();
+        let two1 = BigInt::new("2").unwrap();
+        let two2 = BigInt::new("2").unwrap();
+        assert_eq!(two1, two2.pow(one))
+    }
+
+    // Pow
+    #[test]
+    fn test_pow_2_pow_2_is_4() {
+        let two1 = BigInt::new("2").unwrap();
+        let two2 = BigInt::new("2").unwrap();
+        let four = BigInt::new("4").unwrap();
+        assert_eq!(four, two1.pow(two2))
     }
 }
