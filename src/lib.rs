@@ -1,6 +1,7 @@
+use std::clone::Clone;
 use std::ops::Add;
 use std::ops::Mul;
-use std::clone::Clone;
+use std::slice::Iter;
 
 mod helpers;
 
@@ -57,8 +58,16 @@ impl Add<BigInt> for BigInt {
     fn add(self, other: BigInt) -> BigInt {
         let mut value: Vec<bool> = Vec::new();
 
-        let mut lhs = self.value.iter();
-        let mut rhs = other.value.iter();
+        println!("add: {:?} + {:?}", self.value, other.value);
+
+        let mut lvalue = self.value.clone();
+        lvalue.reverse();
+        let mut lhs = lvalue.iter();
+
+        let mut rvalue = other.value.clone();
+        rvalue.reverse();
+        let mut rhs = rvalue.iter();
+
         let mut carry = false;
 
         loop {
@@ -69,33 +78,39 @@ impl Add<BigInt> for BigInt {
                 if carry {
                     value.push(true);
                 }
+                value.reverse();
                 return BigInt { value };
             }
 
             let lval = *lopt.unwrap_or(&false);
             let rval = *ropt.unwrap_or(&false);
 
-            if !(lval || rval || carry) {
-                value.push(false);
-                carry = false;
-                continue;
-            }
-
-            if (lval && !rval && !carry) || (!lval && !rval && carry) || (!lval && rval && !carry) {
-                value.push(true);
-                carry = false;
-                continue;
-            }
-
-            if (lval && rval && !carry) || (lval && !rval && carry) || (!lval && rval && carry) {
-                value.push(false);
-                carry = true;
-                continue;
-            }
-
-            // The only combination left is (lval && rval && carry)
-            value.push(true);
-            carry = true;
+            let (new_carry, val) = helpers::add_three_bools(lval, rval, carry);
+            carry = new_carry;
+            value.push(val);
+            continue;
+            //
+            // if !(lval || rval || carry) {
+            //     value.push(false);
+            //     carry = false;
+            //     continue;
+            // }
+            //
+            // if (lval && !rval && !carry) || (!lval && !rval && carry) || (!lval && rval && !carry) {
+            //     value.push(true);
+            //     carry = false;
+            //     continue;
+            // }
+            //
+            // if (lval && rval && !carry) || (lval && !rval && carry) || (!lval && rval && carry) {
+            //     value.push(false);
+            //     carry = true;
+            //     continue;
+            // }
+            //
+            // // The only combination left is (lval && rval && carry)
+            // value.push(true);
+            // carry = true;
         }
     }
 }

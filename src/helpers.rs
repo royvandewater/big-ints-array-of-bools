@@ -1,3 +1,19 @@
+pub fn add_three_bools(lhs: bool, rhs: bool, carry: bool) -> (bool, bool) {
+    if lhs && rhs && carry {
+        return (true, true);
+    }
+
+    if (lhs && rhs) || (lhs && carry) || (rhs && carry) {
+        return (true, false);
+    }
+
+    if lhs || rhs || carry {
+        return (false, true);
+    }
+
+    (false, false)
+}
+
 pub fn char_to_bool_vector(character: char) -> Vec<bool> {
     match character {
         '0' => vec![false],
@@ -26,6 +42,46 @@ pub fn is_number(value: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_add_three_bools_fff() {
+        assert_eq!((false, false), add_three_bools(false, false, false))
+    }
+
+    #[test]
+    fn test_add_three_bools_fft() {
+        assert_eq!((false, true), add_three_bools(false, false, true))
+    }
+
+    #[test]
+    fn test_add_three_bools_ftf() {
+        assert_eq!((false, true), add_three_bools(false, true, false))
+    }
+
+    #[test]
+    fn test_add_three_bools_tff() {
+        assert_eq!((false, true), add_three_bools(true, false, false))
+    }
+
+    #[test]
+    fn test_add_three_bools_ftt() {
+        assert_eq!((true, false), add_three_bools(false, true, true))
+    }
+
+    #[test]
+    fn test_add_three_bools_tft() {
+        assert_eq!((true, false), add_three_bools(true, false, true))
+    }
+
+    #[test]
+    fn test_add_three_bools_ttf() {
+        assert_eq!((true, false), add_three_bools(true, true, false))
+    }
+
+    #[test]
+    fn test_add_three_bools_ttt() {
+        assert_eq!((true, true), add_three_bools(true, true, true))
+    }
 
     #[test]
     fn test_is_number_when_it_is_returns_true() {
