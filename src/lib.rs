@@ -1,7 +1,6 @@
 use std::clone::Clone;
 use std::ops::Add;
 use std::ops::Mul;
-use std::slice::Iter;
 
 mod helpers;
 
@@ -16,17 +15,17 @@ impl BigInt {
             return Err("Value contained invalid characters. Only 0-9 allowed");
         }
 
-        let mut big_int = BigInt { value: vec![false] };
-        // let mut count = 0;
+        let mut big_int = BigInt { value: vec![] };
+        let mut count = 0;
 
-        for val in value_str.chars() {
-            let sub_value = BigInt::char_to_big_int(val);
-            // let ten = BigInt { value: vec![true, false, true, false] };
-            // if count > 0 {
-            //     sub_value = sub_value * ten
-            // }
+        for val in value_str.chars().rev() {
+            let mut sub_value = BigInt::char_to_big_int(val);
+            let ten = BigInt { value: vec![true, false, true, false] };
+            if count > 0 {
+                sub_value = sub_value * ten
+            }
             big_int = big_int + sub_value;
-            // count += 1;
+            count += 1;
         }
 
         Ok(big_int)
@@ -57,17 +56,8 @@ impl Add<BigInt> for BigInt {
 
     fn add(self, other: BigInt) -> BigInt {
         let mut value: Vec<bool> = Vec::new();
-
-        println!("add: {:?} + {:?}", self.value, other.value);
-
-        let mut lvalue = self.value.clone();
-        lvalue.reverse();
-        let mut lhs = lvalue.iter();
-
-        let mut rvalue = other.value.clone();
-        rvalue.reverse();
-        let mut rhs = rvalue.iter();
-
+        let mut lhs = self.value.iter().rev();
+        let mut rhs = other.value.iter().rev();
         let mut carry = false;
 
         loop {
@@ -103,17 +93,18 @@ impl Mul for BigInt {
     type Output = BigInt;
 
     fn mul(self, other: BigInt) -> BigInt {
-        let rhs = other.clone();
+        let mut rhs = other.clone();
         let mut product = BigInt { value: vec![] };
 
-        for val in self.value {
-            if val == true {
+        for val in self.value.iter().rev() {
+            println!("product: {:?}, val: {:?}, rhs: {:?}", product, val, rhs);
+            if *val {
                 product = product + rhs.clone()
             }
-            // rhs << 1
+            rhs.value.push(false)
         }
 
-        return BigInt { value: vec![false] };
+        return product;
     }
 }
 
@@ -163,8 +154,9 @@ mod tests {
     #[test]
     fn it_stores_its_value_as_bool_vec_with_0() {
         let zero = BigInt::new("0").unwrap();
+        let zero_vec: Vec<bool> = vec![];
 
-        assert_eq!(vec![false], zero.value);
+        assert_eq!(zero_vec, zero.value);
     }
 
     #[test]
@@ -172,6 +164,13 @@ mod tests {
         let two = BigInt::new("2").unwrap();
 
         assert_eq!(vec![true, false], two.value);
+    }
+
+    #[test]
+    fn it_stores_its_value_as_bool_vec_with_10() {
+        let ten = BigInt::new("10").unwrap();
+
+        assert_eq!(vec![true, false, true, false], ten.value);
     }
 
     #[test]
@@ -259,9 +258,23 @@ mod tests {
         assert_eq!(zero, zero.clone() * zero.clone())
     }
 
-    // #[test]
-    // fn test_1_times_1_is_1() {
-    //     let one = BigInt::new("1").unwrap();
-    //     assert_eq!(one, one.clone() * one.clone())
-    // }
+    #[test]
+    fn test_1_times_1_is_1() {
+        let one = BigInt::new("1").unwrap();
+        assert_eq!(one, one.clone() * one.clone())
+    }
+
+    #[test]
+    fn test_1_times_2_is_2() {
+        let one = BigInt::new("1").unwrap();
+        let two = BigInt::new("2").unwrap();
+        assert_eq!(two, one.clone() * two.clone())
+    }
+
+    #[test]
+    fn test_2_times_2_is_4() {
+        let two = BigInt::new("2").unwrap();
+        let four = BigInt::new("4").unwrap();
+        assert_eq!(four, two.clone() * two.clone())
+    }
 }

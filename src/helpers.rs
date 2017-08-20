@@ -16,7 +16,7 @@ pub fn add_three_bools(lhs: bool, rhs: bool, carry: bool) -> (bool, bool) {
 
 pub fn char_to_bool_vector(character: char) -> Vec<bool> {
     match character {
-        '0' => vec![false],
+        '0' => vec![],
         '1' => vec![true],
         '2' => vec![true, false],
         '3' => vec![true, true],
