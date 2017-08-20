@@ -89,28 +89,6 @@ impl Add<BigInt> for BigInt {
             carry = new_carry;
             value.push(val);
             continue;
-            //
-            // if !(lval || rval || carry) {
-            //     value.push(false);
-            //     carry = false;
-            //     continue;
-            // }
-            //
-            // if (lval && !rval && !carry) || (!lval && !rval && carry) || (!lval && rval && !carry) {
-            //     value.push(true);
-            //     carry = false;
-            //     continue;
-            // }
-            //
-            // if (lval && rval && !carry) || (lval && !rval && carry) || (!lval && rval && carry) {
-            //     value.push(false);
-            //     carry = true;
-            //     continue;
-            // }
-            //
-            // // The only combination left is (lval && rval && carry)
-            // value.push(true);
-            // carry = true;
         }
     }
 }
