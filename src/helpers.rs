@@ -39,10 +39,23 @@ pub fn is_number(value: &str) -> bool {
     true
 }
 
+pub fn sub_two_bools(lhs: bool, rhs: bool) -> (bool, bool) {
+    if lhs && !rhs {
+        return (false, true);
+    }
+
+    if !lhs && rhs {
+        return (true, true);
+    }
+
+    (false, false)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    // add_three_bools
     #[test]
     fn test_add_three_bools_fff() {
         assert_eq!((false, false), add_three_bools(false, false, false))
@@ -83,6 +96,7 @@ mod tests {
         assert_eq!((true, true), add_three_bools(true, true, true))
     }
 
+    // is_number
     #[test]
     fn test_is_number_when_it_is_returns_true() {
         assert!(is_number("123"))
@@ -91,5 +105,26 @@ mod tests {
     #[test]
     fn test_is_number_when_it_is_not_returns_false() {
         assert!(!is_number("abc"))
+    }
+
+    // sub_two_bools
+    #[test]
+    fn test_sub_two_bools_ff() {
+        assert_eq!((false, false), sub_two_bools(false, false))
+    }
+
+    #[test]
+    fn test_sub_two_bools_ft() {
+        assert_eq!((true, true), sub_two_bools(false, true))
+    }
+
+    #[test]
+    fn test_sub_two_bools_tf() {
+        assert_eq!((false, true), sub_two_bools(true, false))
+    }
+
+    #[test]
+    fn test_sub_two_bools_tt() {
+        assert_eq!((false, false), sub_two_bools(true, true))
     }
 }
