@@ -198,7 +198,7 @@ impl Sub for BigInt {
             let lval = *lopt.unwrap_or(&false);
             let rval = *ropt.unwrap_or(&false);
 
-            let (new_carry, val) = helpers::sub_two_bools(lval, rval);
+            let (new_carry, val) = helpers::sub_three_bools(lval, rval, carry);
             carry = new_carry;
             value.push(val);
             continue;
@@ -277,6 +277,8 @@ mod tests {
         let big = BigInt::new("9223372036854775808").unwrap();
         let small = BigInt::new("100").unwrap();
         let bigger = big.pow(small);
+
+        assert_ne!(BigInt::zero(), bigger)
     }
 
     #[test]
@@ -443,5 +445,13 @@ mod tests {
         let one = BigInt::new("1").unwrap();
 
         assert_eq!(one, one.clone() - zero.clone())
+    }
+
+    #[test]
+    fn test_sub_2_minus_1_is_1() {
+        let one = BigInt::new("1").unwrap();
+        let two = BigInt::new("2").unwrap();
+
+        assert_eq!(one, two.clone() - one.clone())
     }
 }

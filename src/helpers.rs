@@ -39,16 +39,12 @@ pub fn is_number(value: &str) -> bool {
     true
 }
 
-pub fn sub_two_bools(lhs: bool, rhs: bool) -> (bool, bool) {
-    if lhs && !rhs {
-        return (false, true);
-    }
+pub fn sub_three_bools(lhs: bool, rhs: bool, carry: bool) -> (bool, bool) {
+    let new_carry = (!lhs && (rhs || carry)) || (lhs && rhs && carry);
+    let val = (lhs && !(rhs || carry)) || (lhs && rhs && carry) || (!lhs && rhs && !carry) ||
+        (!lhs && !rhs && carry);
 
-    if !lhs && rhs {
-        return (true, true);
-    }
-
-    (false, false)
+    (new_carry, val)
 }
 
 #[cfg(test)]
@@ -107,24 +103,44 @@ mod tests {
         assert!(!is_number("abc"))
     }
 
-    // sub_two_bools
+    // sub_three_bools
     #[test]
-    fn test_sub_two_bools_ff() {
-        assert_eq!((false, false), sub_two_bools(false, false))
+    fn test_sub_three_bools_fff() {
+        assert_eq!((false, false), sub_three_bools(false, false, false))
     }
 
     #[test]
-    fn test_sub_two_bools_ft() {
-        assert_eq!((true, true), sub_two_bools(false, true))
+    fn test_sub_three_bools_fft() {
+        assert_eq!((true, true), sub_three_bools(false, false, true))
     }
 
     #[test]
-    fn test_sub_two_bools_tf() {
-        assert_eq!((false, true), sub_two_bools(true, false))
+    fn test_sub_three_bools_ftf() {
+        assert_eq!((true, true), sub_three_bools(false, true, false))
     }
 
     #[test]
-    fn test_sub_two_bools_tt() {
-        assert_eq!((false, false), sub_two_bools(true, true))
+    fn test_sub_three_bools_ftt() {
+        assert_eq!((true, true), sub_three_bools(false, true, false))
+    }
+
+    #[test]
+    fn test_sub_three_bools_tff() {
+        assert_eq!((false, true), sub_three_bools(true, false, false))
+    }
+
+    #[test]
+    fn test_sub_three_bools_tft() {
+        assert_eq!((false, false), sub_three_bools(true, false, true))
+    }
+
+    #[test]
+    fn test_sub_three_bools_ttf() {
+        assert_eq!((false, false), sub_three_bools(true, true, false))
+    }
+
+    #[test]
+    fn test_sub_three_bools_ttt() {
+        assert_eq!((true, true), sub_three_bools(true, true, true))
     }
 }
